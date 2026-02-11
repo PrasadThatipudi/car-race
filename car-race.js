@@ -21,21 +21,28 @@ class Way extends React.Component {
     super(props);
     this.carDimensions = { height: 100, width: 90 };
     this.state = { cars: [{ carPosition: -this.carDimensions.height }] };
+    this.offSet = 30;
+    this.updateCarPosition = this.updateCarPosition.bind(null, this.offSet);
+    this.isCarReachedEndOfRoad = this.isCarReachedEndOfRoad.bind(
+      null,
+      this.props.wayDimensions.height,
+    );
+  }
+
+  updateCarPosition(offSet, car) {
+    return { carPosition: car.carPosition + offSet };
+  }
+
+  isCarReachedEndOfRoad(roadHeight, car) {
+    return car.carPosition < roadHeight;
   }
 
   componentDidMount() {
     setInterval(() => {
       this.setState((state) => {
         const cars = state.cars
-          .map(({ carPosition }) => {
-            const newCarPosition =
-              carPosition >= this.props.wayDimensions.height
-                ? null
-                : carPosition + 31;
-
-            return { carPosition: newCarPosition };
-          })
-          .filter(({ carPosition }) => carPosition !== null);
+          .map(this.updateCarPosition)
+          .filter(this.isCarReachedEndOfRoad);
 
         return { cars };
       });
