@@ -18,8 +18,39 @@ class Car extends React.Component {
   }
 }
 
-const car = React.createElement(Car);
-ReactDOM.render(
-  React.createElement("div", { className: "road" }, car),
-  main_container,
-);
+class Way extends React.Component {
+  constructor(props) {
+    super(props);
+  }
+
+  render() {
+    const road = this.props.road;
+    const car = React.createElement(Car);
+
+    return React.createElement(
+      "div",
+      {
+        className: "way",
+        style: { ...road },
+      },
+      car,
+    );
+  }
+}
+
+class Road extends React.Component {
+  constructor(props) {
+    super(props);
+    this.wayDimensions = { height: 300, width: 110 };
+  }
+
+  render() {
+    const ways = Array.from({ length: 3 }, (_, index) =>
+      React.createElement(Way, { key: index, road: this.wayDimensions }),
+    );
+
+    return React.createElement("div", { className: "road" }, ways);
+  }
+}
+
+ReactDOM.render(React.createElement(Road), main_container);

@@ -1,11 +1,13 @@
 .road {
-  width: 300px;
-  aspect-ratio: 1;
+  display: flex;
+}
+
+.way {
   border: 1px solid black;
 }
 
 .car {
-  width: 30%;
+  width: 100%;
   aspect-ratio: 1;
   border: 1px solid black;
 }
