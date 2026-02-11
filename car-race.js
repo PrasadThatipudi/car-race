@@ -5,7 +5,12 @@ class Car extends React.Component {
 
   render() {
     return React.createElement("div", {
-      style: { position: "relative", top: `${this.props.carPosition}px` },
+      style: {
+        position: "relative",
+        top: `${this.props.carPosition}px`,
+        width: `${this.props.carDimensions.width}px`,
+        height: `${this.props.carDimensions.height}px`,
+      },
       className: "car",
     });
   }
@@ -14,25 +19,45 @@ class Car extends React.Component {
 class Way extends React.Component {
   constructor(props) {
     super(props);
-    this.state = { carPosition: 0 };
+    this.carDimensions = { height: 100, width: 90 };
+    this.state = { cars: [{ carPosition: -this.carDimensions.height }] };
   }
 
   componentDidMount() {
     setInterval(() => {
-      this.setState(({ carPosition }) => ({ carPosition: carPosition + 10 }));
+      this.setState((state) => {
+        const cars = state.cars
+          .map(({ carPosition }) => {
+            const newCarPosition =
+              carPosition >= this.props.wayDimensions.height
+                ? null
+                : carPosition + 31;
+
+            return { carPosition: newCarPosition };
+          })
+          .filter(({ carPosition }) => carPosition !== null);
+
+        return { cars };
+      });
     }, 1000);
   }
 
   render() {
-    const dimensions = this.props.dimensions;
+    const cars = this.state.cars.map(({ carPosition }, index) =>
+      React.createElement(Car, {
+        carPosition,
+        key: index,
+        carDimensions: this.carDimensions,
+      }),
+    );
 
     return React.createElement(
       "div",
       {
         className: "way",
-        style: { ...dimensions },
+        style: { ...this.props.wayDimensions },
       },
-      React.createElement(Car, { carPosition: this.state.carPosition }),
+      cars,
     );
   }
 }
@@ -45,7 +70,10 @@ class Road extends React.Component {
 
   render() {
     const ways = Array.from({ length: 1 }, (_, index) =>
-      React.createElement(Way, { key: index, dimensions: this.wayDimensions }),
+      React.createElement(Way, {
+        key: index,
+        wayDimensions: this.wayDimensions,
+      }),
     );
 
     return React.createElement("div", { className: "road" }, ways);
