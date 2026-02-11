@@ -39,8 +39,23 @@ class Way extends React.Component {
     return car.carPosition < roadHeight;
   }
 
+  isGameOver() {
+    const racingCar = this.props.racingCar;
+    const cars = this.state.cars;
+
+    return cars.some(
+      (car) =>
+        car.carPosition + this.carDimensions.height >= racingCar.carPosition,
+    );
+  }
+
   componentDidMount() {
-    setInterval(() => {
+    const internalId = setInterval(() => {
+      if (this.isGameOver()) {
+        this.props.whenGameOver();
+        return clearInterval(internalId);
+      }
+
       this.setState((state) => {
         const cars = state.cars
           .map(this.updateCarPosition)
@@ -81,8 +96,20 @@ class Way extends React.Component {
 class Road extends React.Component {
   constructor(props) {
     super(props);
-    this.wayDimensions = { height: 500, width: 110 };
+    this.wayDimensions = { height: 200, width: 110 };
     this.carDimensions = { height: 100, width: 90 };
+    this.state = {
+      racingCar: {
+        carPosition: this.wayDimensions.height - this.carDimensions.height,
+      },
+      isGameOver: false,
+    };
+
+    this.whenGameOver = this.whenGameOver.bind(this);
+  }
+
+  whenGameOver() {
+    this.setState({ isGameOver: true });
   }
 
   render() {
@@ -90,10 +117,9 @@ class Road extends React.Component {
       React.createElement(Way, {
         key: index,
         wayDimensions: this.wayDimensions,
-        racingCar: {
-          carPosition: this.wayDimensions.height - this.carDimensions.height,
-        },
+        racingCar: this.state.racingCar,
         carDimensions: this.carDimensions,
+        whenGameOver: this.whenGameOver,
       }),
     );
 
