@@ -6,7 +6,7 @@ class Car extends React.Component {
   render() {
     return React.createElement("div", {
       style: {
-        position: "relative",
+        position: "absolute",
         top: `${this.props.carPosition}px`,
         width: `${this.props.carDimensions.width}px`,
         height: `${this.props.carDimensions.height}px`,
@@ -19,8 +19,10 @@ class Car extends React.Component {
 class Way extends React.Component {
   constructor(props) {
     super(props);
-    this.carDimensions = { height: 100, width: 90 };
-    this.state = { cars: [{ carPosition: -this.carDimensions.height }] };
+    this.carDimensions = props.carDimensions;
+    this.state = {
+      cars: [{ carPosition: -this.carDimensions.height }],
+    };
     this.offSet = 30;
     this.updateCarPosition = this.updateCarPosition.bind(null, this.offSet);
     this.isCarReachedEndOfRoad = this.isCarReachedEndOfRoad.bind(
@@ -62,9 +64,16 @@ class Way extends React.Component {
       "div",
       {
         className: "way",
-        style: { ...this.props.wayDimensions },
+        style: { ...this.props.wayDimensions, position: "relative" },
       },
       cars,
+      this.props.racingCar
+        ? React.createElement(Car, {
+            carPosition: this.props.racingCar.carPosition,
+            key: "racing-car",
+            carDimensions: this.carDimensions,
+          })
+        : null,
     );
   }
 }
@@ -72,7 +81,8 @@ class Way extends React.Component {
 class Road extends React.Component {
   constructor(props) {
     super(props);
-    this.wayDimensions = { height: 300, width: 110 };
+    this.wayDimensions = { height: 500, width: 110 };
+    this.carDimensions = { height: 100, width: 90 };
   }
 
   render() {
@@ -80,6 +90,10 @@ class Road extends React.Component {
       React.createElement(Way, {
         key: index,
         wayDimensions: this.wayDimensions,
+        racingCar: {
+          carPosition: this.wayDimensions.height - this.carDimensions.height,
+        },
+        carDimensions: this.carDimensions,
       }),
     );
 
