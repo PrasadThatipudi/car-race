@@ -1,18 +1,11 @@
 class Car extends React.Component {
   constructor(props) {
     super(props);
-    this.state = { top: 0 };
-  }
-
-  componentDidMount() {
-    setInterval(() => {
-      this.setState(({ top }) => ({ top: top + 10 }));
-    }, 1000);
   }
 
   render() {
     return React.createElement("div", {
-      style: { position: "relative", top: `${this.state.top}px` },
+      style: { position: "relative", top: `${this.props.carPosition}px` },
       className: "car",
     });
   }
@@ -21,19 +14,25 @@ class Car extends React.Component {
 class Way extends React.Component {
   constructor(props) {
     super(props);
+    this.state = { carPosition: 0 };
+  }
+
+  componentDidMount() {
+    setInterval(() => {
+      this.setState(({ carPosition }) => ({ carPosition: carPosition + 10 }));
+    }, 1000);
   }
 
   render() {
-    const road = this.props.road;
-    const car = React.createElement(Car);
+    const dimensions = this.props.dimensions;
 
     return React.createElement(
       "div",
       {
         className: "way",
-        style: { ...road },
+        style: { ...dimensions },
       },
-      car,
+      React.createElement(Car, { carPosition: this.state.carPosition }),
     );
   }
 }
@@ -45,8 +44,8 @@ class Road extends React.Component {
   }
 
   render() {
-    const ways = Array.from({ length: 3 }, (_, index) =>
-      React.createElement(Way, { key: index, road: this.wayDimensions }),
+    const ways = Array.from({ length: 1 }, (_, index) =>
+      React.createElement(Way, { key: index, dimensions: this.wayDimensions }),
     );
 
     return React.createElement("div", { className: "road" }, ways);
