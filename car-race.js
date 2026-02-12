@@ -20,28 +20,11 @@ class Lane extends React.Component {
   constructor(props) {
     super(props);
     this.carDimensions = props.carDimensions;
-    this.state = {
-      cars: [{ carPosition: -this.carDimensions.height }],
-    };
-    this.offSet = 1;
-    this.updateCarPosition = this.updateCarPosition.bind(null, this.offSet);
-    this.isCarReachedEndOfRoad = this.isCarReachedEndOfRoad.bind(
-      null,
-      this.props.laneDimensions.height,
-    );
-  }
-
-  updateCarPosition(offSet, car) {
-    return { carPosition: car.carPosition + offSet };
-  }
-
-  isCarReachedEndOfRoad(roadHeight, car) {
-    return car.carPosition < roadHeight;
   }
 
   isGameOver() {
     const racingCar = this.props.racingCar;
-    const cars = this.state.cars;
+    const cars = this.props.cars;
 
     return cars.some(
       (car) =>
@@ -51,6 +34,7 @@ class Lane extends React.Component {
 
   componentDidMount() {
     const internalId = setInterval(() => {
+      console.log("Inside component did mount");
       if (this.props.isGameOver) {
         return clearInterval(internalId);
       }
@@ -60,18 +44,12 @@ class Lane extends React.Component {
         return clearInterval(internalId);
       }
 
-      this.setState((state) => {
-        const cars = state.cars
-          .map(this.updateCarPosition)
-          .filter(this.isCarReachedEndOfRoad);
-
-        return { cars };
-      });
+      this.props.updateAllCarsPositions();
     }, this.props.carSpeed);
   }
 
   render() {
-    const cars = this.state.cars.map(({ carPosition }, index) =>
+    const cars = this.props.cars.map(({ carPosition }, index) =>
       React.createElement(Car, {
         carPosition,
         key: index,
@@ -104,16 +82,24 @@ class Road extends React.Component {
     this.carDimensions = { height: 100, width: 90 };
     this.noOfLanes = 3;
     this.carSpeed = 10;
+    this.offSet = 1;
     this.state = {
       racingCar: {
         carPosition: this.laneDimensions.height - this.carDimensions.height,
       },
+      lanes: Array.from({ length: this.noOfLanes }, () => ({ cars: [] })),
       racingCarLanePosition: 0,
       isGameOver: false,
     };
 
     this.whenGameOver = this.whenGameOver.bind(this);
     this.handleMovingRacingCar = this.handleMovingRacingCar.bind(this);
+    this.updateCarPosition = this.updateCarPosition.bind(null, this.offSet);
+    this.isCarReachedEndOfRoad = this.isCarReachedEndOfRoad.bind(
+      null,
+      this.laneDimensions.height,
+    );
+    this.updateAllCarsPositions = this.updateAllCarsPositions.bind(this);
   }
 
   whenGameOver() {
@@ -147,10 +133,43 @@ class Road extends React.Component {
     }
   }
 
-  render() {
-    const lanes = Array.from({ length: this.noOfLanes }, () => ({}));
+  addCar(lane) {
+    const newCar = { carPosition: 0 };
 
-    lanes[this.state.racingCarLanePosition] = {
+    return { cars: [...lane.cars, newCar] };
+  }
+
+  componentDidMount() {
+    this.setState(({ lanes }) => {
+      const copyOfLanes = [...lanes];
+
+      copyOfLanes[0] = this.addCar(copyOfLanes[0]);
+      console.log(copyOfLanes);
+      return { lanes: copyOfLanes };
+    });
+  }
+
+  updateCarPosition(offSet, car) {
+    return { carPosition: car.carPosition + offSet };
+  }
+
+  isCarReachedEndOfRoad(roadHeight, car) {
+    return car.carPosition < roadHeight;
+  }
+
+  updateAllCarsPositions() {
+    this.setState(({ lanes }) => ({
+      lanes: lanes.map(({ cars }) => ({
+        cars: cars
+          .map(this.updateCarPosition)
+          .filter(this.isCarReachedEndOfRoad),
+      })),
+    }));
+  }
+
+  render() {
+    this.state.lanes[this.state.racingCarLanePosition] = {
+      ...this.state.lanes[this.state.racingCarLanePosition],
       racingCar: this.state.racingCar,
       whenGameOver: this.whenGameOver,
     };
@@ -164,13 +183,14 @@ class Road extends React.Component {
     return React.createElement(
       "div",
       { className: "road" },
-      lanes.map((properties, index) =>
+      this.state.lanes.map((properties, index) =>
         React.createElement(Lane, {
           key: index,
           laneDimensions: this.laneDimensions,
           carDimensions: this.carDimensions,
           isGameOver: this.state.isGameOver,
           carSpeed: this.carSpeed,
+          updateAllCarsPositions: this.updateAllCarsPositions,
           ...properties,
         }),
       ),
