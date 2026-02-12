@@ -23,7 +23,7 @@ class Lane extends React.Component {
     this.state = {
       cars: [{ carPosition: -this.carDimensions.height }],
     };
-    this.offSet = 30;
+    this.offSet = 1;
     this.updateCarPosition = this.updateCarPosition.bind(null, this.offSet);
     this.isCarReachedEndOfRoad = this.isCarReachedEndOfRoad.bind(
       null,
@@ -67,7 +67,7 @@ class Lane extends React.Component {
 
         return { cars };
       });
-    }, 1000);
+    }, this.props.carSpeed);
   }
 
   render() {
@@ -100,9 +100,10 @@ class Lane extends React.Component {
 class Road extends React.Component {
   constructor(props) {
     super(props);
-    this.laneDimensions = { height: 200, width: 110 };
+    this.laneDimensions = { height: 600, width: 110 };
     this.carDimensions = { height: 100, width: 90 };
     this.noOfLanes = 3;
+    this.carSpeed = 10;
     this.state = {
       racingCar: {
         carPosition: this.laneDimensions.height - this.carDimensions.height,
@@ -169,6 +170,7 @@ class Road extends React.Component {
           laneDimensions: this.laneDimensions,
           carDimensions: this.carDimensions,
           isGameOver: this.state.isGameOver,
+          carSpeed: this.carSpeed,
           ...properties,
         }),
       ),
