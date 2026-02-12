@@ -1,3 +1,4 @@
+const uniqueIdGenerator = (start) => () => start++;
 class Car extends React.Component {
   constructor(props) {
     super(props);
@@ -11,6 +12,7 @@ class Car extends React.Component {
         width: `${this.props.carDimensions.width}px`,
         height: `${this.props.carDimensions.height}px`,
       },
+      id: this.props.carId,
       className: "car",
     });
   }
@@ -34,7 +36,6 @@ class Lane extends React.Component {
 
   componentDidMount() {
     const internalId = setInterval(() => {
-      console.log("Inside component did mount");
       if (this.props.isGameOver) {
         return clearInterval(internalId);
       }
@@ -49,10 +50,11 @@ class Lane extends React.Component {
   }
 
   render() {
-    const cars = this.props.cars.map(({ carPosition }, index) =>
+    const cars = this.props.cars.map(({ carPosition, carId }) =>
       React.createElement(Car, {
         carPosition,
-        key: index,
+        carId: carId,
+        key: carId.toString(),
         carDimensions: this.carDimensions,
       }),
     );
@@ -67,6 +69,7 @@ class Lane extends React.Component {
       this.props.racingCar
         ? React.createElement(Car, {
             carPosition: this.props.racingCar.carPosition,
+            carId: "racing-car",
             key: "racing-car",
             carDimensions: this.carDimensions,
           })
@@ -83,6 +86,8 @@ class Road extends React.Component {
     this.noOfLanes = 3;
     this.carSpeed = 10;
     this.offSet = 1;
+    this.uniqueCarId = uniqueIdGenerator(0);
+    this.carStartingPosition = -this.carDimensions.height;
     this.state = {
       racingCar: {
         carPosition: this.laneDimensions.height - this.carDimensions.height,
@@ -100,6 +105,7 @@ class Road extends React.Component {
       this.laneDimensions.height,
     );
     this.updateAllCarsPositions = this.updateAllCarsPositions.bind(this);
+    this.addCar = this.addCar.bind(this);
   }
 
   whenGameOver() {
@@ -123,7 +129,6 @@ class Road extends React.Component {
   }
 
   handleMovingRacingCar(event) {
-    console.log("Inside handler");
     if (event.key === "ArrowLeft") {
       return this.moveCarToLeftLane();
     }
@@ -134,23 +139,37 @@ class Road extends React.Component {
   }
 
   addCar(lane) {
-    const newCar = { carPosition: 0 };
+    const newCar = {
+      carPosition: this.carStartingPosition,
+      carId: this.uniqueCarId(),
+    };
 
     return { cars: [...lane.cars, newCar] };
   }
 
   componentDidMount() {
-    this.setState(({ lanes }) => {
-      const copyOfLanes = [...lanes];
+    let laneIndexToAddCar = 0;
 
-      copyOfLanes[0] = this.addCar(copyOfLanes[0]);
-      console.log(copyOfLanes);
-      return { lanes: copyOfLanes };
-    });
+    const intervalId = setInterval(() => {
+      if (this.state.isGameOver) {
+        return clearInterval(intervalId);
+      }
+
+      this.setState(({ lanes }) => {
+        const copyOfLanes = [...lanes];
+
+        copyOfLanes[laneIndexToAddCar] = this.addCar(
+          copyOfLanes[laneIndexToAddCar],
+        );
+
+        laneIndexToAddCar = (laneIndexToAddCar + 1) % this.noOfLanes;
+        return { lanes: copyOfLanes };
+      });
+    }, this.carSpeed * 100);
   }
 
   updateCarPosition(offSet, car) {
-    return { carPosition: car.carPosition + offSet };
+    return { ...car, carPosition: car.carPosition + offSet };
   }
 
   isCarReachedEndOfRoad(roadHeight, car) {
