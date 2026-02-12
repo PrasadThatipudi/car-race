@@ -102,6 +102,7 @@ class Road extends React.Component {
     super(props);
     this.laneDimensions = { height: 200, width: 110 };
     this.carDimensions = { height: 100, width: 90 };
+    this.noOfLanes = 3;
     this.state = {
       racingCar: {
         carPosition: this.laneDimensions.height - this.carDimensions.height,
@@ -111,19 +112,53 @@ class Road extends React.Component {
     };
 
     this.whenGameOver = this.whenGameOver.bind(this);
+    this.handleMovingRacingCar = this.handleMovingRacingCar.bind(this);
   }
 
   whenGameOver() {
     this.setState({ isGameOver: true });
   }
 
+  moveCarToLeftLane() {
+    this.setState(({ racingCarLanePosition }) =>
+      racingCarLanePosition === 0
+        ? { racingCarLanePosition }
+        : { racingCarLanePosition: racingCarLanePosition - 1 },
+    );
+  }
+
+  moveCarToRightLane() {
+    this.setState(({ racingCarLanePosition }) =>
+      racingCarLanePosition + 1 === this.noOfLanes
+        ? { racingCarLanePosition }
+        : { racingCarLanePosition: racingCarLanePosition + 1 },
+    );
+  }
+
+  handleMovingRacingCar(event) {
+    console.log("Inside handler");
+    if (event.key === "ArrowLeft") {
+      return this.moveCarToLeftLane();
+    }
+
+    if (event.key === "ArrowRight") {
+      return this.moveCarToRightLane();
+    }
+  }
+
   render() {
-    const lanes = Array.from({ length: 3 }, () => ({}));
+    const lanes = Array.from({ length: this.noOfLanes }, () => ({}));
 
     lanes[this.state.racingCarLanePosition] = {
       racingCar: this.state.racingCar,
       whenGameOver: this.whenGameOver,
     };
+
+    document.addEventListener("keydown", this.handleMovingRacingCar);
+
+    if (this.state.isGameOver) {
+      document.removeEventListener("keydown", this.handleMovingRacingCar);
+    }
 
     return React.createElement(
       "div",
