@@ -16,7 +16,7 @@ class Car extends React.Component {
   }
 }
 
-class Way extends React.Component {
+class Lane extends React.Component {
   constructor(props) {
     super(props);
     this.carDimensions = props.carDimensions;
@@ -27,7 +27,7 @@ class Way extends React.Component {
     this.updateCarPosition = this.updateCarPosition.bind(null, this.offSet);
     this.isCarReachedEndOfRoad = this.isCarReachedEndOfRoad.bind(
       null,
-      this.props.wayDimensions.height,
+      this.props.laneDimensions.height,
     );
   }
 
@@ -82,8 +82,8 @@ class Way extends React.Component {
     return React.createElement(
       "div",
       {
-        className: "way",
-        style: { ...this.props.wayDimensions, position: "relative" },
+        className: "lane",
+        style: { ...this.props.laneDimensions, position: "relative" },
       },
       cars,
       this.props.racingCar
@@ -100,13 +100,13 @@ class Way extends React.Component {
 class Road extends React.Component {
   constructor(props) {
     super(props);
-    this.wayDimensions = { height: 200, width: 110 };
+    this.laneDimensions = { height: 200, width: 110 };
     this.carDimensions = { height: 100, width: 90 };
     this.state = {
       racingCar: {
-        carPosition: this.wayDimensions.height - this.carDimensions.height,
+        carPosition: this.laneDimensions.height - this.carDimensions.height,
       },
-      racingCarWayPosition: 0,
+      racingCarLanePosition: 0,
       isGameOver: false,
     };
 
@@ -118,9 +118,9 @@ class Road extends React.Component {
   }
 
   render() {
-    const ways = Array.from({ length: 3 }, () => ({}));
+    const lanes = Array.from({ length: 3 }, () => ({}));
 
-    ways[this.state.racingCarWayPosition] = {
+    lanes[this.state.racingCarLanePosition] = {
       racingCar: this.state.racingCar,
       whenGameOver: this.whenGameOver,
     };
@@ -128,10 +128,10 @@ class Road extends React.Component {
     return React.createElement(
       "div",
       { className: "road" },
-      ways.map((properties, index) =>
-        React.createElement(Way, {
+      lanes.map((properties, index) =>
+        React.createElement(Lane, {
           key: index,
-          wayDimensions: this.wayDimensions,
+          laneDimensions: this.laneDimensions,
           carDimensions: this.carDimensions,
           isGameOver: this.state.isGameOver,
           ...properties,
