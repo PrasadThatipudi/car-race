@@ -29,10 +29,18 @@ class Lane extends React.Component {
     const racingCar = this.props.racingCar;
     const cars = this.props.cars;
 
-    return cars.some(
-      (car) =>
-        car.carPosition + this.carDimensions.height >= racingCar.carPosition,
-    );
+    return cars.some((car) => {
+      const carFrontPosition = car.carPosition + this.carDimensions.height;
+      const carBackPosition = car.carPosition;
+      const racingCarFrontPosition = racingCar.carPosition;
+      const racingCarBackPosition =
+        racingCar.carPosition - this.carDimensions.height;
+
+      return (
+        carFrontPosition > racingCarFrontPosition ||
+        carBackPosition > racingCarBackPosition
+      );
+    });
   }
 
   componentDidMount() {
@@ -111,6 +119,10 @@ class Road extends React.Component {
     );
     this.updateAllCarsPositions = this.updateAllCarsPositions.bind(this);
     this.addCar = this.addCar.bind(this);
+    this.moveCarDown = this.moveCarDown.bind(this);
+    this.moveCarUp = this.moveCarUp.bind(this);
+    this.moveCarToLeftLane = this.moveCarToLeftLane.bind(this);
+    this.moveCarToRightLane = this.moveCarToRightLane.bind(this);
   }
 
   whenGameOver() {
@@ -163,21 +175,14 @@ class Road extends React.Component {
   }
 
   handleMovingRacingCar(event) {
-    if (event.key === "ArrowLeft") {
-      return this.moveCarToLeftLane();
-    }
+    const actions = {
+      ArrowLeft: this.moveCarToLeftLane,
+      ArrowRight: this.moveCarToRightLane,
+      ArrowUp: this.moveCarUp,
+      ArrowDown: this.moveCarDown,
+    };
 
-    if (event.key === "ArrowRight") {
-      return this.moveCarToRightLane();
-    }
-
-    if (event.key === "ArrowUp") {
-      return this.moveCarUp();
-    }
-
-    if (event.key === "ArrowDown") {
-      return this.moveCarDown();
-    }
+    actions[event.key]();
   }
 
   addCar(lane) {
