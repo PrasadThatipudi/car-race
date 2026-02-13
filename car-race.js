@@ -86,7 +86,8 @@ class Road extends React.Component {
     this.carDimensions = { height: 100, width: 90 };
     this.noOfLanes = 3;
     this.carSpeed = 10;
-    this.offSet = 1;
+    this.otherCarsOffSet = 1;
+    this.racingCarOffSet = 40;
     this.uniqueCarId = uniqueIdGenerator(0);
     this.carStartingPosition = -this.carDimensions.height;
     this.state = {
@@ -100,7 +101,10 @@ class Road extends React.Component {
 
     this.whenGameOver = this.whenGameOver.bind(this);
     this.handleMovingRacingCar = this.handleMovingRacingCar.bind(this);
-    this.updateCarPosition = this.updateCarPosition.bind(null, this.offSet);
+    this.updateCarPosition = this.updateCarPosition.bind(
+      null,
+      this.otherCarsOffSet,
+    );
     this.isCarReachedEndOfRoad = this.isCarReachedEndOfRoad.bind(
       null,
       this.laneDimensions.height,
@@ -129,6 +133,35 @@ class Road extends React.Component {
     );
   }
 
+  moveCarUp() {
+    this.setState(({ racingCar }) => {
+      const nextCarPosition = racingCar.carPosition - this.racingCarOffSet;
+
+      return {
+        racingCar: {
+          carPosition:
+            nextCarPosition < 0 ? racingCar.carPosition : nextCarPosition,
+        },
+      };
+    });
+  }
+
+  moveCarDown() {
+    this.setState(({ racingCar }) => {
+      const nextCarPosition = racingCar.carPosition + this.racingCarOffSet;
+
+      return {
+        racingCar: {
+          carPosition:
+            nextCarPosition >
+            this.laneDimensions.height - this.carDimensions.height
+              ? racingCar.carPosition
+              : nextCarPosition,
+        },
+      };
+    });
+  }
+
   handleMovingRacingCar(event) {
     if (event.key === "ArrowLeft") {
       return this.moveCarToLeftLane();
@@ -136,6 +169,14 @@ class Road extends React.Component {
 
     if (event.key === "ArrowRight") {
       return this.moveCarToRightLane();
+    }
+
+    if (event.key === "ArrowUp") {
+      return this.moveCarUp();
+    }
+
+    if (event.key === "ArrowDown") {
+      return this.moveCarDown();
     }
   }
 
