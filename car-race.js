@@ -1,4 +1,5 @@
 const uniqueIdGenerator = (start) => () => start++;
+const selectRandomNumber = (from, to) => Math.floor(Math.random() * to + from);
 class Car extends React.Component {
   constructor(props) {
     super(props);
@@ -162,7 +163,7 @@ class Road extends React.Component {
           copyOfLanes[laneIndexToAddCar],
         );
 
-        laneIndexToAddCar = (laneIndexToAddCar + 1) % this.noOfLanes;
+        laneIndexToAddCar = selectRandomNumber(0, this.noOfLanes);
         return { lanes: copyOfLanes };
       });
     }, this.carSpeed * 100);
